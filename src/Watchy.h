@@ -60,6 +60,7 @@ typedef struct watchySettings {
   int gmtOffset;
   //
   bool vibrateOClock;
+  bool darkColorScheme;
 } watchySettings;
 
 class Watchy {
@@ -82,6 +83,8 @@ public:
   void vibMotor(uint8_t intervalMs = 100, uint8_t length = 20);
 
   virtual void handleButtonPress();
+  inline uint16_t fgColor() { return settings.darkColorScheme ? GxEPD_WHITE : GxEPD_BLACK; }
+  inline uint16_t bgColor() { return settings.darkColorScheme ? GxEPD_BLACK : GxEPD_WHITE; }
   void showMenu(byte menuIndex, bool partialRefresh);
   void showFastMenu(byte menuIndex, bool partialRefresh = true);
   void showAbout();
