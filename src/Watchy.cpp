@@ -83,7 +83,7 @@ void Watchy::init(String datetime) {
     #ifdef ARDUINO_ESP32S3_DEV
     pinMode(USB_DET_PIN, INPUT);
     USB_PLUGGED_IN = (digitalRead(USB_DET_PIN) == 1);
-    #endif    
+    #endif
     gmtOffset = settings.gmtOffset;
     RTC.read(currentTime);
     RTC.read(bootTime);
@@ -287,6 +287,11 @@ void Watchy::handleButtonPress() {
 }
 
 void Watchy::showMenu(byte menuIndex, bool partialRefresh) {
+  showFastMenu(menuIndex, partialRefresh);
+  alreadyInMenu = false;
+}
+
+void Watchy::showFastMenu(byte menuIndex, bool partialRefresh) {
   display.setFullWindow();
   display.fillScreen(GxEPD_BLACK);
   display.setFont(&FreeMonoBold9pt7b);
@@ -314,39 +319,6 @@ void Watchy::showMenu(byte menuIndex, bool partialRefresh) {
   }
 
   display.display(partialRefresh);
-
-  guiState = MAIN_MENU_STATE;
-  alreadyInMenu = false;
-}
-
-void Watchy::showFastMenu(byte menuIndex) {
-  display.setFullWindow();
-  display.fillScreen(GxEPD_BLACK);
-  display.setFont(&FreeMonoBold9pt7b);
-
-  int16_t x1, y1;
-  uint16_t w, h;
-  int16_t yPos;
-
-  const char *menuItems[] = {
-      "About Watchy", "Vibrate Motor", "Show Accelerometer",
-      "Set Time",     "Setup WiFi",    "Update Firmware",
-      "Sync NTP"};
-  for (int i = 0; i < MENU_LENGTH; i++) {
-    yPos = MENU_HEIGHT + (MENU_HEIGHT * i);
-    display.setCursor(0, yPos);
-    if (i == menuIndex) {
-      display.getTextBounds(menuItems[i], 0, yPos, &x1, &y1, &w, &h);
-      display.fillRect(x1 - 1, y1 - 10, 200, h + 15, GxEPD_WHITE);
-      display.setTextColor(GxEPD_BLACK);
-      display.println(menuItems[i]);
-    } else {
-      display.setTextColor(GxEPD_WHITE);
-      display.println(menuItems[i]);
-    }
-  }
-
-  display.display(true);
 
   guiState = MAIN_MENU_STATE;
 }
@@ -378,15 +350,15 @@ void Watchy::showAbout() {
   //int seconds = (totalSeconds % 60);
   int minutes = (totalSeconds % 3600) / 60;
   int hours = (totalSeconds % 86400) / 3600;
-  int days = (totalSeconds % (86400 * 30)) / 86400; 
+  int days = (totalSeconds % (86400 * 30)) / 86400;
   display.print(days);
   display.print("d");
   display.print(hours);
   display.print("h");
   display.print(minutes);
-  display.println("m");  
+  display.println("m");
   #endif
-  
+
   if(WIFI_CONFIGURED){
     display.print("SSID: ");
     display.println(lastSSID);
@@ -433,7 +405,7 @@ void Watchy::setTime() {
   uint8_t hour   = currentTime.Hour;
   uint8_t day    = currentTime.Day;
   uint8_t month  = currentTime.Month;
-  uint8_t year   = currentTime.Year;  
+  uint8_t year   = currentTime.Year;
   #else
   int8_t minute = currentTime.Minute;
   int8_t hour   = currentTime.Hour;
